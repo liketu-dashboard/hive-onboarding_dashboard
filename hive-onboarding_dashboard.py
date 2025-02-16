@@ -11,7 +11,7 @@ from MAU import get_hive_onboarder_MAU
 # import matplotlib.pyplot as plt
 # import matplotlib.ticker as mtick
 # from matplotlib.ticker import FuncFormatter
-# from hive_top10_stats_v2 import hive_top10_stats_ratios
+from hive_top10_stats_v2 import hive_top10_stats
 # from hive_top15_apps_historical_data_users import hive_top15_apps_historical_data_users
 # #from hive_top15_apps_historical_data_users_onboarded_by_liketu import hive_top15_apps_historical_data_users_onboarded_by
 # from liketu_engagement_league import generate_liketu_engagement_league_table_app, generate_liketu_engagement_league_table_community
@@ -32,12 +32,12 @@ from MAU import get_hive_onboarder_MAU
 # from geolocation_stats import generate_geolocation_liketu_stats_app, generate_geolocation_hive_stats
 # from farcaster_dashboard import get_farcaster_network_dashboard
 # from hive_curator import get_hive_curator_stats
-# from liketu_onboarded_users import generate_onboarded_users_stats
+from hive_onboarded_users import generate_onboarded_users_stats
 # #from leo_onboarded_users import generate_onboarded_users_stats_leo
 # from challenge_21_days import generate_challenge_21_days, get_list_of_runners_21_days
 # from challenge_21_days_summary import generate_challenge_21_days_summary
 
-# CONST_REWARDS_PERIOD = 7
+CONST_REWARDS_PERIOD = 7
  
 
 st.title('Hive onboarders Dashboard')
@@ -46,7 +46,7 @@ st.sidebar.title("Options")
 
 option = st.sidebar.selectbox(
      'Which dashboard?',
-     ('All HIVE onboarders', 'MAU'))
+     ('All HIVE onboarders', 'MAU', 'Onboarded Users stats', 'HIVE Top 10 apps stats'))
 st.header(option)
 #st.sidebar.write('You selected:', option)
 
@@ -76,6 +76,35 @@ elif option == 'MAU':
 
     if submitted:
         get_hive_onboarder_MAU(onboarder)
+
+elif option == 'Onboarded Users stats':
+      
+    with st.form("onboarded_hive"):
+        with st.sidebar:
+
+            # Every form must have a submit button.
+            onboarder = st.text_input(label='Enter HIVE onboarder')
+            submitted = st.form_submit_button("Submit")
+            if submitted:
+                pass
+
+    if submitted:
+        generate_onboarded_users_stats(onboarder)        
+
+elif option == 'HIVE Top 10 apps stats':  
+    with st.form("top10_apps"):
+
+        with st.sidebar:    
+
+            onboarder = st.text_input(label='Enter HIVE onboarder')
+            submitted = st.form_submit_button("Submit")
+            if submitted:
+                pass        
+
+
+    if submitted:
+        hive_top10_stats(CONST_REWARDS_PERIOD, onboarder)
+
         
 
 
