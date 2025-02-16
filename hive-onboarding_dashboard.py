@@ -40,7 +40,7 @@ from MAU import get_hive_onboarder_MAU
 # CONST_REWARDS_PERIOD = 7
  
 
-st.title('Liketu Dashboard')
+st.title('Hive onboarders Dashboard')
 
 st.sidebar.title("Options")
 
