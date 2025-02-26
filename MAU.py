@@ -7,6 +7,8 @@ import json
 import plotly.express as px
 import plotly.graph_objects as go
 import pyodbc
+from dateutil.relativedelta import relativedelta
+
 
 
 def get_hive_onboarder_MAU(onboarder):
@@ -65,6 +67,73 @@ def get_hive_onboarder_MAU(onboarder):
 
     # Optionally, adjust the text position
     fig.update_traces(textposition='outside')
+    st.plotly_chart(fig,use_container_width=True)    
+
+def get_hive_onboarder_MAU_monthly(onboarder, start_date):
+    end_date = start_date + relativedelta(months=1)
+    formatted_date = start_date.strftime("%B %Y")
+    st.header(f"Monthly cohort: {formatted_date}")
+
+
+
+
+    # Establish the connection
+    connection = pyodbc.connect('Driver={ODBC Driver 17 for SQL Server};'
+                                'Server=vip.hivesql.io;'
+                                'Database=DBHive;'
+                                f'uid={st.secrets["DB_USERNAME"]};pwd={st.secrets["DB_PASSWORD"]}'
+    )
+
+
+    # Define the SQL command
+    SQLCommand = f"""
+    SELECT
+        FORMAT(c.created, 'yyyy-MM') AS Month,
+        COUNT(DISTINCT c.author) AS MAU
+    FROM
+        Comments c
+    INNER JOIN
+        TxAccountCreates t
+        ON c.author = t.new_account_name
+    WHERE
+        t.creator = '{onboarder}' 
+        AND t.timestamp >= '{start_date.strftime('%Y-%m-%d')}'
+        AND t.timestamp < '{end_date.strftime('%Y-%m-%d')}'
+    GROUP BY
+        FORMAT(c.created, 'yyyy-MM')
+    ORDER BY
+        Month ASC;
+    """
+
+    # Fetch the data
+    df_result_MAU= pd.read_sql(SQLCommand, connection)
+
+    # Close the connection
+    connection.close()
+    
+
+    # Create a bar chart using plotly.express
+    fig = px.bar(
+        df_result_MAU,
+        x='Month',
+        y='MAU',
+        title=f'MAU, Hive Global, created by {onboarder}<br>Monthly cohort: {formatted_date}',
+        labels={'Month': 'Calendar Month', 'MAU': 'MAU'},
+        #hover_data={'Month': False},  # Hides the YearMonth in hover since it's already on the x-axis
+        text='MAU',  # Adds the count as text on top of each bar
+    )
+
+    # Customize the layout for better aesthetics
+    fig.update_layout(
+        xaxis=dict(tickangle=0),
+        yaxis=dict(title='MAU, Hive Global'),
+        hovermode='x',
+        template='plotly_white'
+    )
+
+    # Optionally, adjust the text position
+    fig.update_traces(textposition='outside')
+
     st.plotly_chart(fig,use_container_width=True)    
 
 

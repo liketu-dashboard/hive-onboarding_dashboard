@@ -4,8 +4,9 @@ import pandas as pd
 import datetime
 from datetime import timedelta
 from datetime import date
+import calendar
 from all_hive_onboarders import generate_all_hive_onboarders
-from MAU import get_hive_onboarder_MAU
+from MAU import get_hive_onboarder_MAU, get_hive_onboarder_MAU_monthly
 #import pyodbc
 # import numpy as np
 # import matplotlib.pyplot as plt
@@ -62,20 +63,43 @@ if option == 'All HIVE onboarders':
     if submitted:
         generate_all_hive_onboarders()
 
-elif option == 'MAU':    
-   
-    with st.form("hive_curator"):
+elif option == 'MAU':
+    # All inputs are placed in a single form.
+    with st.sidebar:
+        cohort_choice = st.radio("Select MAU type:", ["all", "monthly cohort"])
 
-        with st.sidebar:
+        with st.form("hive_curator"):
+            # Let the user choose between "all" and "monthly cohort"
+            onboarder = st.text_input(label="Enter HIVE onboarder")
+            
+            # If "monthly cohort" is selected, display month and year selectors
+            if cohort_choice == "monthly cohort":
+                month = st.selectbox("Select month", list(calendar.month_name)[1:])  # January to December
+                current_year = datetime.date.today().year
+                start_year = 2016  # Adjust this to your desired starting year
+                year = st.selectbox("Select year", list(range(start_year, current_year + 1)))
+                
+                # Compute start and end dates for the chosen month
+                start_date = datetime.date(year, list(calendar.month_name).index(month), 1)
 
-            onboarder = st.text_input(label='Enter HIVE onboarder')
-            submitted = st.form_submit_button("Submit")
+                submitted = st.form_submit_button("Submit")
+                if submitted:
+                    pass                
 
-            if submitted:
-                pass
+            elif cohort_choice == "all":
+                submitted = st.form_submit_button("Submit")
+                if submitted:
+                    pass                 
+
+
 
     if submitted:
-        get_hive_onboarder_MAU(onboarder)
+        if cohort_choice == "monthly cohort":
+            get_hive_onboarder_MAU_monthly(onboarder, start_date=start_date)
+        else:
+            get_hive_onboarder_MAU(onboarder)
+
+
 
 elif option == 'Onboarded Users stats':
       
